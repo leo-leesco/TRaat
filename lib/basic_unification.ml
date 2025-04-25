@@ -12,3 +12,11 @@ type subst = (vname * term) list
 let ( &? ) x sub = List.exists (fun (y, _) -> x = y) sub
 
 
+(* apply substitution to single variable *)
+let rec ( @ ) sub x =
+  match sub with
+  | (y, t) :: _ when x = y -> t
+  | _ :: dom -> dom @ x
+  | [] -> raise Not_found
+
+(* let rec ( @@ ) sub t = *)
