@@ -1,4 +1,4 @@
-open Unification
+open Base
 open OUnit2
 
 let () =
