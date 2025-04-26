@@ -1,4 +1,4 @@
 (library
  (name traat)
- (modules base unification)
+ (modules base unification matching)
  (package traat))
