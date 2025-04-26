@@ -15,8 +15,8 @@ and elim (x : vname) (t : term) (system : (term * term) list) (sub : subst) =
   if x &&? t then raise (Failure "Trying to solve a self-referential equation")
   else
     solve
-      (List.map (fun (u, v) -> ([ (x, t) ] @@ u, [ (x, t) ] @@ v)) system)
-      ((x, t) :: List.map (fun (y, u) -> (y, [ (x, t) ] @@ u)) sub)
+      (List.map (fun (u, v) -> ([ (x, t) ] &@@ u, [ (x, t) ] &@@ v)) system)
+      ((x, t) :: List.map (fun (y, u) -> (y, [ (x, t) ] &@@ u)) sub)
 
 (* try to unify both terms *)
 let unify t1 t2 = solve [ (t1, t2) ] []

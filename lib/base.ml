@@ -18,9 +18,9 @@ let rec ( &@ ) sub x =
   | [] -> raise Not_found
 
 (* apply substitution to a term *)
-let rec ( @@ ) sub = function
+let rec ( &@@ ) sub = function
   | V x -> ( try sub &@ x with Not_found -> V x)
-  | T (f, t) -> T (f, List.map (fun term -> sub @@ term) t)
+  | T (f, t) -> T (f, List.map (fun term -> sub &@@ term) t)
 
 (* test if x in Var(t) *)
 let rec ( &&? ) x = function
