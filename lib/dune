@@ -1,5 +1,5 @@
 (library
  (name traat)
- (modules base unification matching)
+ (modules base unification matching rewriting)
  (package traat)
 (wrapped false))
