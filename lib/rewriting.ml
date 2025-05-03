@@ -1,4 +1,5 @@
 open Matching
+open Unification
 open Base
 
 exception Normal_form_reached

@@ -1,5 +1,7 @@
 open Base
 
+exception Unify of string
+
 let rec solve (system : (term * term) list) (sub : subst) =
   match system with
   | [] -> sub
@@ -9,10 +11,10 @@ let rec solve (system : (term * term) list) (sub : subst) =
   | (t, V x) :: system -> elim x t system sub (* orient and eliminate *)
   | (T (f, t), T (g, s)) :: system when f = g ->
       solve (List.combine t s @ system) sub (* decompose *)
-  | _ -> raise (Failure "This system cannot be solved")
+  | _ -> raise (Unify "This system cannot be solved")
 
 and elim (x : vname) (t : term) (system : (term * term) list) (sub : subst) =
-  if x &&? t then raise (Failure "Trying to solve a self-referential equation")
+  if x &&? t then raise (Unify "Trying to solve a self-referential equation")
   else
     solve
       (List.map (fun (u, v) -> ([ (x, t) ] &@@ u, [ (x, t) ] &@@ v)) system)

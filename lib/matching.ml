@@ -1,6 +1,5 @@
 open Base
-
-exception Unify of string
+open Unification
 
 let rec match_system system sub =
   match system with

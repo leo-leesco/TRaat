@@ -8,10 +8,10 @@ type subst = (vname * term) list
 (* {("x",1) -> ("t",0) ; ("y",2) -> T ("f", [T("a",[]),V("y",1)])} *)
 
 (** indom (p.79) * test if x in Dom(sub) *)
-let ( &? ) x sub = List.exists (fun (y, _) -> x = y) sub
+let ( &? ) x (sub : subst) = List.exists (fun (y, _) -> x = y) sub
 
 (** app (p.79) * apply substitution to single variable *)
-let rec ( &@ ) sub x =
+let rec ( &@ ) (sub : subst) x =
   match sub with
   | (y, t) :: _ when x = y -> t
   | _ :: dom -> dom &@ x
@@ -26,3 +26,11 @@ let rec ( &@@ ) sub = function
 let rec ( &&? ) x = function
   | V y -> x = y
   | T (_, t) -> List.exists (fun u -> x &&? u) t
+
+let rec offset_rename n = function
+  | V (x, i) -> V (x, i + n)
+  | T (f, s) -> T (f, List.map (offset_rename n) s)
+
+let rec max_index = function
+  | V (_, i) -> i
+  | T (_, s) -> List.fold_left (fun m t -> max m (max_index t)) 0 s
