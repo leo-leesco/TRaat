@@ -1,5 +1,8 @@
 open Base
 
+type 'a order = 'a -> 'a -> int
+type 'a partial_order = 'a -> 'a -> int option
+
 (** [lex l m] returns the sign of "[l - m]", i.e.
 
     [l<m ->] negative
@@ -7,14 +10,14 @@ open Base
     [l=m ->] 0
 
     [l>m ->] positive *)
-let rec lex (ord : 'a -> 'a -> int) = function
+let rec lex (ord : 'a order) = function
   | l, m when List.length l <> List.length m -> List.length l - List.length m
   | a :: l, b :: m -> if ord a b = 0 then lex ord (l, m) else ord a b
   | [], [] -> 0
   | [], _ | _, [] ->
       failwith "element-wise comparison should have already be handled"
 
-let rec lex_path_order (ord : string -> string -> int) = function
+let rec lex_path_order (ord : string order) = function
   | s, (V x as t) -> if s = t then 0 else if x &&? s then 1 (* LPO1 *) else -1
   | V _, T _ -> -1
   | (T (f, sl) as s), (T (g, tl) as t) ->
@@ -63,5 +66,5 @@ let rec rec_path_order
     {!knuth_bendix_order}) *)
 let term_weight (w : vname -> float) = failwith "TODO"
 
-let rec knuth_bendix_order (ord : term -> term -> int) (w : term -> float) =
+let rec knuth_bendix_order (ord : term order) (w : term -> float) =
   failwith "TODO"
