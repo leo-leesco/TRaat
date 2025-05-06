@@ -11,10 +11,11 @@ end)
 
 module Basic = struct
   let rec complete (order : term partial_order) (trs : TermSet.t) =
+    let trsl = TermSet.to_list trs in
     let rules =
-      critical_pairs (TermSet.to_list trs)
+      critical_pairs trsl
       |> List.map (fun (l, r) ->
-             let l, r = (norm trs l, norm trs r) in
+             let l, r = (norm trsl l, norm trsl r) in
              match order l r with
              | Some comp ->
                  if comp > 0 then (l, r)
