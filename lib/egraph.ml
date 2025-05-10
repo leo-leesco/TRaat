@@ -1,0 +1,3 @@
+module UnionFind = struct
+  ()
+end
