@@ -1,31 +1,34 @@
 module UnionFind = struct
-  type 'a node = { data : 'a; parent : 'a node option; depth : int }
+  type 'a node = { data : 'a; mutable parent : int; mutable depth : int }
   (** depth should be the max number of children, 0 when a leaf
-
-      parent points to itself when it is the ancestor of the class
 
       (not reduced by path compression, so it is actually worst case) *)
 
-  let node data = { data; parent = None; depth = 0 }
-  let eq a b = a.data = b.data
+  type 'a graph = 'a node Array.t
 
-  (** returns the updated node with its parent being the ancestor of the class
-  *)
-  let rec find n =
-    match n.parent with
-    | None -> None
-    | Some parent -> Some { parent with parent = find parent }
-  (* if n.parent = n then n else { n.parent with parent = find n.parent } *)
+  let make data_array =
+    Array.mapi (fun idx data -> { data; parent = idx; depth = 0 }) data_array
 
-  let union n m =
-    let n = Option.value (find n) ~default:n in
-    let m = Option.value (find m) ~default:m in
+  (** returns the index of the ancestor
 
-    if n.depth > m.depth then
-      { m with parent = Some { n with depth = n.depth } }
-    else if n.depth < m.depth then
-      { n with parent = Some { m with depth = m.depth } }
-    else { m with parent = Some { n with depth = n.depth + 1 } }
+      performs path compression *)
+  let rec find graph node_idx =
+    if not (0 <= node_idx && node_idx <= Array.length graph) then
+      raise (Invalid_argument "Tried to access an out-of-bounds node")
+    else if graph.(node_idx).parent <> node_idx then (
+      graph.(node_idx).parent <- find graph node_idx;
+      graph.(node_idx).parent)
+    else node_idx
+
+  let union graph n m =
+    let n = find graph n in
+    let m = find graph m in
+
+    if graph.(n).depth > graph.(m).depth then graph.(m).parent <- n
+    else if graph.(n).depth < graph.(m).depth then graph.(n).parent <- m
+    else (
+      graph.(m).parent <- n;
+      graph.(n).depth <- graph.(n).depth + 1)
 end
 
 type 'a enode = { data : 'a UnionFind.node; parent : 'a enode option }

@@ -59,12 +59,12 @@ let rec rec_path_order
         else -1
       else 1
 
-(** returns a positive function over terms, induced by a weight function over
-    variables and function symbols
-
-    it should be admissible when used with an order (for the
-    {!knuth_bendix_order}) *)
-let term_weight (w : vname -> float) = failwith "TODO"
-
-let rec knuth_bendix_order (ord : term order) (w : term -> float) =
-  failwith "TODO"
+(* (** returns a positive function over terms, induced by a weight function over *)
+(*     variables and function symbols *)
+(**)
+(*     it should be admissible when used with an order (for the *)
+(*     {!knuth_bendix_order}) *) *)
+(* let term_weight (w : vname -> float) = failwith "TODO" *)
+(**)
+(* let rec knuth_bendix_order (ord : term order) (w : term -> float) = *)
+(*   failwith "TODO" *)

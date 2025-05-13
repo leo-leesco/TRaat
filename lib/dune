@@ -1,5 +1,13 @@
 (library
  (name traat)
- (modules base unification matching rewriting orders critical completion egraph)
+ (modules
+  base
+  unification
+  matching
+  rewriting
+  orders
+  critical
+  completion
+  egraph)
  (package traat)
  (wrapped false))
