@@ -1,1 +1,7 @@
 _build
+*.heic
+*.HEIC
+*.pdf
+*.jpg
+*.jpeg
+*.png
