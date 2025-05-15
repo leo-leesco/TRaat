@@ -5,3 +5,4 @@ _build
 *.jpg
 *.jpeg
 *.png
+.DS_Store
