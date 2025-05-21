@@ -1,5 +1,3 @@
-(** test *)
-
 (** represents equivalence classes as connected components of a graph *)
 module UnionFind : sig
   type id
@@ -74,17 +72,30 @@ type 'a enode = { data : 'a; children : id list }
 type 'a eclass = 'a enode list
 type 'a egraph = 'a eclass graph
 
-type 'var subst = 'var -> id
-(** WARNING : this is not [Base.subst]
+(* What should an e-graph do ?
+ * 1. load the AST of an expression
+ * 2. apply a given rewrite to it
+ * 3. extract the best rewritten equivalent expression according to some cost function
+ *
+ * What is specific about an e-graph ?
+ * - each e-node points to e-classes, but e-classes do not point to anything
+ * - rewrites are applied on a match with a sought after pattern and add new e-nodes (and connections based on the match)
+ * - when adding e-nodes, try to share with existing ones (has to be the same data and children)
+ * *)
 
-    [Base.subst] is a list of substitutions that map variables to terms
+let lookup 
 
-    [Egraph.subst] returns the id of an enode that matches [!TODO what ?] *)
-
-let add_pattern (graph : 'a egraph) (pattern : Base.term) (subst : 'var subst) :
-    id =
-  failwith "TODO"
-
-let add (graph : 'a egraph) (node : 'a) : id =
-  add_pattern graph node (fun _ ->
-      failwith "The substitution should be empty when adding a new element")
+(* type 'var subst = 'var -> id *)
+(* (** WARNING : this is not [Base.subst] *)
+(**)
+(*     [Base.subst] is a list of substitutions that maps variables to terms *)
+(**)
+(*     [Egraph.subst] returns the id of an enode that matches [!TODO what ?] *) *)
+(**)
+(* let add_pattern (graph : 'a egraph) (pattern : Base.term) (subst : 'var subst) : *)
+(*     id = *)
+(*   failwith "TODO" *)
+(**)
+(* let add (graph : 'a egraph) (node : 'a) : id = *)
+(*   add_pattern graph node (fun _ -> *)
+(*       failwith "The substitution should be empty when adding a new element") *)
