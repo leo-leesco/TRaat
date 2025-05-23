@@ -81,9 +81,15 @@ type 'a egraph = 'a eclass graph
  * - each e-node points to e-classes, but e-classes do not point to anything
  * - rewrites are applied on a match with a sought after pattern and add new e-nodes (and connections based on the match)
  * - when adding e-nodes, try to share with existing ones (has to be the same data and children)
- * *)
+ *)
 
-let lookup 
+let of_term (expr : Base.term) : Base.vname egraph = failwith "TODO"
+
+(** implements extraction based on cost function
+
+    if the cost function is not provided, simply find the lightest equivalent
+    term (each edge gets weigthed equally) *)
+let to_term (eg : Base.vname egraph) : Base.term = failwith "TODO"
 
 (* type 'var subst = 'var -> id *)
 (* (** WARNING : this is not [Base.subst] *)
