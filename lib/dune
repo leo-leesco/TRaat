@@ -10,4 +10,5 @@
   completion
   egraph)
  (package traat)
- (wrapped false))
+ (wrapped false)
+ (flags (:standard -warn-error -27)))

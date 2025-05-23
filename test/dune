@@ -1,3 +1,4 @@
 (tests
  (names test_base test_egraph)
- (libraries traat ounit2))
+ (libraries traat ounit2)
+ (flags (:standard -warn-error -a)))
