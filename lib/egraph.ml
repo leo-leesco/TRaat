@@ -1,4 +1,4 @@
-(** represents equivalence classes as connected components of a graph *)
+(**represents equivalence classes as connected components of a graph *)
 module UnionFind : sig
   type id
   (** should be a valid index i.e. be lower than the number of elements in the
@@ -89,7 +89,11 @@ let of_term (expr : Base.term) : Base.vname egraph = failwith "TODO"
 
     if the cost function is not provided, simply find the lightest equivalent
     term (each edge gets weigthed equally) *)
-let to_term (eg : Base.vname egraph) : Base.term = failwith "TODO"
+let to_term ?(weight = None) (eg : Base.vname egraph) : Base.term =
+  failwith "TODO"
+
+(** apply in place the rewrite to the egraph *)
+let ( @@= ) rewrite (eg : Base.vname egraph) = failwith "TODO"
 
 (* type 'var subst = 'var -> id *)
 (* (** WARNING : this is not [Base.subst] *)

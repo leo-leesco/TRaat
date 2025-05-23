@@ -1,10 +1,11 @@
-type vname = string * int
+type vname = string
+type var = vname * int
 
 type term =
-  | V of vname (* x_1 = V("x", 1) *)
+  | V of var (* x_1 = V("x", 1) *)
   | T of string * term list (* f(a,y_2) = T ("f", [T("a",[]) , V("y",2)]) *)
 
-type subst = (vname * term) list
+type subst = (var * term) list
 (* {("x",1) -> ("t",0) ; ("y",2) -> T ("f", [T("a",[]),V("y",1)])} *)
 
 (** [indom] (p.79)
