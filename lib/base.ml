@@ -42,3 +42,37 @@ let rec offset_rename n = function
 let rec max_index = function
   | V (_, i) -> i
   | T (_, s) -> List.fold_left (fun m t -> max m (max_index t)) 0 s
+
+(* UTILITIES *)
+
+let rec term_depth t =
+  match t with
+  | V _ -> 1
+  | T (_, ts) -> 1 + List.fold_left (fun d t -> max d (term_depth t)) 0 ts
+
+let rec symbol_count = function
+  | V _ -> 1
+  | T (_, ts) -> 1 + List.fold_left (fun d t -> d + symbol_count t) 0 ts
+
+let subscript_digit c =
+  match c with
+  | '0' -> "₀"
+  | '1' -> "₁"
+  | '2' -> "₂"
+  | '3' -> "₃"
+  | '4' -> "₄"
+  | '5' -> "₅"
+  | '6' -> "₆"
+  | '7' -> "₇"
+  | '8' -> "₈"
+  | '9' -> "₉"
+  | _ -> invalid_arg "Not a digit"
+
+let index_to_subscript (i : int) : string =
+  string_of_int i |> String.to_seq |> Seq.map subscript_digit |> List.of_seq
+  |> String.concat ""
+
+let rec string_of_term = function
+  | V (x, idx) -> x ^ index_to_subscript idx
+  | T (f, []) -> f
+  | T (f, ts) -> f ^ "(" ^ String.concat ", " (List.map string_of_term ts) ^ ")"
