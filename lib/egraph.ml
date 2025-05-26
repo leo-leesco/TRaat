@@ -1,4 +1,4 @@
-(**represents equivalence classes as connected components of a graph *)
+(** represents equivalence classes as connected components of a graph *)
 module UnionFind : sig
   type id
   (** should be a valid index i.e. be lower than the number of elements in the
@@ -13,6 +13,13 @@ module UnionFind : sig
   val add : 'a graph -> 'a -> unit
   val find : 'a graph -> id -> id
   val union : 'a graph -> id -> id -> unit
+
+  val join : ?f:(int -> 'a -> 'a) -> 'a graph -> 'a graph -> 'a graph
+  (** merge two unconnected sets together and applies [f] to the second one
+
+      equivalence classes are preserved
+
+      [f] first argument is the offset, in case [data] relies on [id] *)
 end = struct
   type id = int
 
@@ -64,6 +71,16 @@ end = struct
 
   (* we only allow to access data, not the internal implementation *)
   let ( .!() ) graph idx = graph.!(idx).data
+
+  let join ?(f = fun _ data -> data) graph1 graph2 =
+    let offset = Dynarray.length graph1 in
+    Dynarray.append graph1 graph2;
+    Dynarray.mapi
+      (fun idx elem ->
+        if idx > offset then
+          { elem with parent = elem.parent + offset; data = f offset elem.data }
+        else elem)
+      graph1
 end
 
 open UnionFind
