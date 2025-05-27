@@ -102,27 +102,18 @@ type 'a egraph = 'a eclass graph
 
 let of_term (expr : Base.term) : Base.vname egraph = failwith "TODO"
 
+(** extracts a term that only contains representatives
+
+    starts with the given eclass *)
+let to_term (eg : Base.vname egraph) (base : Base.vname eclass) : Base.term =
+  failwith "TODO"
+
 (** implements extraction based on cost function
 
     if the cost function is not provided, simply find the lightest equivalent
     term (each edge gets weigthed equally) *)
-let to_term ?(weight = None) (eg : Base.vname egraph) : Base.term =
+let extract_best ?(weight = None) (eg : Base.vname egraph) : Base.term =
   failwith "TODO"
 
 (** apply in place the rewrite to the egraph *)
 let ( @@= ) rewrite (eg : Base.vname egraph) = failwith "TODO"
-
-(* type 'var subst = 'var -> id *)
-(* (** WARNING : this is not [Base.subst] *)
-(**)
-(*     [Base.subst] is a list of substitutions that maps variables to terms *)
-(**)
-(*     [Egraph.subst] returns the id of an enode that matches [!TODO what ?] *) *)
-(**)
-(* let add_pattern (graph : 'a egraph) (pattern : Base.term) (subst : 'var subst) : *)
-(*     id = *)
-(*   failwith "TODO" *)
-(**)
-(* let add (graph : 'a egraph) (node : 'a) : id = *)
-(*   add_pattern graph node (fun _ -> *)
-(*       failwith "The substitution should be empty when adding a new element") *)
