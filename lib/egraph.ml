@@ -4,17 +4,17 @@ module UnionFind : sig
   (** should be a valid index i.e. be lower than the number of elements in the
       set *)
 
-  type 'a graph
+  type 'a classes
 
-  val ( .!() ) : 'a graph -> id -> 'a
+  val ( .!() ) : 'a classes -> id -> 'a
   (** access the data contained inside a node *)
 
-  val make : 'a list -> 'a graph
-  val add : 'a graph -> 'a -> unit
-  val find : 'a graph -> id -> id
-  val union : 'a graph -> id -> id -> unit
+  val make : 'a list -> 'a classes
+  val add : 'a classes -> 'a -> unit
+  val find : 'a classes -> id -> id
+  val union : 'a classes -> id -> id -> unit
 
-  val join : ?f:(int -> 'a -> 'a) -> 'a graph -> 'a graph -> 'a graph
+  val join : ?f:(int -> 'a -> 'a) -> 'a classes -> 'a classes -> 'a classes
   (** merge two unconnected sets together and applies [f] to the second one
 
       equivalence classes are preserved
@@ -30,7 +30,7 @@ end = struct
 
       (not reduced by path compression, so it is actually worst case) *)
 
-  type 'a graph = 'a node Dynarray.t
+  type 'a classes = 'a node Dynarray.t
 
   (* those serve to mimic the interface of [Array] *)
   let ( .!() ) = Dynarray.get
@@ -41,17 +41,17 @@ end = struct
       (fun idx data -> { data; parent = idx; depth = 0 })
       (Dynarray.of_list data)
 
-  let add (graph : 'a graph) data =
+  let add (graph : 'a classes) data =
     Dynarray.add_last graph { data; parent = Dynarray.length graph; depth = 0 }
 
-  let assert_valid_id (graph : 'a graph) (node_idx : id) =
+  let assert_valid_id (graph : 'a classes) (node_idx : id) =
     if not (0 <= node_idx && node_idx <= Dynarray.length graph) then
       raise (Invalid_argument "Tried to access an out-of-bounds node")
 
   (** returns the index of the ancestor
 
       performs path compression *)
-  let rec find (graph : 'a graph) node_idx =
+  let rec find (graph : 'a classes) node_idx =
     assert_valid_id graph node_idx;
 
     if graph.!(node_idx).parent <> node_idx then (
@@ -86,8 +86,8 @@ end
 open UnionFind
 
 type 'a enode = { data : 'a; children : id list }
-type 'a eclass = 'a enode list
-type 'a egraph = 'a eclass graph
+type 'a egraph = 'a enode classes * ('a enode, id list) Hashtbl.t
+(***)
 
 (* What should an e-graph do ?
  * 1. load the AST of an expression
