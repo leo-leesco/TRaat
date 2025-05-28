@@ -1,5 +1,7 @@
-type vname = string
-type var = vname * int
+type var = string * int
+(** eg ("x",0) represents x₀ *)
+
+type symbol = Var of var | F of string
 
 type term =
   | V of var (* x_1 = V("x", 1) *)
