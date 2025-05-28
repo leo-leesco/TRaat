@@ -86,8 +86,13 @@ end
 open UnionFind
 
 type 'a enode = { data : 'a; children : id list }
-type 'a egraph = 'a enode classes * ('a enode, id list) Hashtbl.t
-(***)
+
+type 'a egraph = {
+  unionfind : 'a enode classes;
+  hashcons : ('a enode, id) Hashtbl.t;
+}
+(** an [egraph] is represented by the UnionFind classes that can be queried
+    according to their [id], and reciprocally you can get the *)
 
 (* What should an e-graph do ?
  * 1. load the AST of an expression
@@ -100,20 +105,27 @@ type 'a egraph = 'a enode classes * ('a enode, id list) Hashtbl.t
  * - when adding e-nodes, try to share with existing ones (has to be the same data and children)
  *)
 
-let of_term (expr : Base.term) : Base.vname egraph = failwith "TODO"
+(** retrieves the [id] of [expr] if it was already represented in the [egraph]
+    or raises [Not_found] *)
+let rec find (eg : Base.symbol egraph) (expr : Base.term) : id =
+  Hashtbl.find eg.hashcons
+    (match expr with
+    | V x -> { data = Var x; children = [] }
+    | T (f, t) -> { data = F f; children = List.map (find eg) t })
+
+let of_term (expr : Base.term) : Base.symbol egraph = failwith "TODO"
 
 (** extracts a term that only contains representatives
 
     starts with the given eclass *)
-let to_term (eg : Base.vname egraph) (base : Base.vname eclass) : Base.term =
-  failwith "TODO"
+let to_term (eg : Base.symbol egraph) (base : id) : Base.term = failwith "TODO"
 
 (** implements extraction based on cost function
 
     if the cost function is not provided, simply find the lightest equivalent
     term (each edge gets weigthed equally) *)
-let extract_best ?(weight = None) (eg : Base.vname egraph) : Base.term =
+let extract_best ?(weight = None) (eg : Base.symbol egraph) : Base.term =
   failwith "TODO"
 
 (** apply in place the rewrite to the egraph *)
-let ( @@= ) rewrite (eg : Base.vname egraph) = failwith "TODO"
+let ( @@= ) rewrite (eg : Base.symbol egraph) = failwith "TODO"
