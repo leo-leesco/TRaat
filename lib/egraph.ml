@@ -143,7 +143,9 @@ let rec of_term ?(eg : symbol egraph = empty) (expr : term) : id =
 
     add eg enode
 
+(* those functions are actually aliases for [of_term], because that allows for reuse of exactly the same logic *)
 let find (eg : symbol egraph) (expr : term) : id = of_term ~eg expr
+let add_term (eg : symbol egraph) (expr : term) : id = of_term ~eg expr
 
 let union (eg : 'a egraph) (class1 : id) (class2 : id) : id =
   UnionFind.union eg.unionfind class1 class2
