@@ -9,12 +9,16 @@ module UnionFind : sig
   val ( .!() ) : 'a classes -> id -> 'a
   (** access the data contained inside a node *)
 
+  val create : unit -> 'a classes
   val make : 'a list -> 'a classes
-  val add : 'a classes -> 'a -> unit
-  val find : 'a classes -> id -> id
-  val union : 'a classes -> id -> id -> unit
 
-  val join : ?f:(int -> 'a -> 'a) -> 'a classes -> 'a classes -> 'a classes
+  val add : 'a classes -> 'a -> id
+  (** modifies the graph in-place and returns its new [id] *)
+
+  val find : 'a classes -> id -> id
+  val union : 'a classes -> id -> id -> id
+
+  val join : ?f:(id -> 'a -> 'a) -> 'a classes -> 'a classes -> 'a classes
   (** merge two unconnected sets together and applies [f] to the second one
 
       equivalence classes are preserved
@@ -36,13 +40,17 @@ end = struct
   let ( .!() ) = Dynarray.get
   (* let ( .!()<- ) = Dynarray.set *)
 
+  let create = Dynarray.create
+
   let make data =
     Dynarray.mapi
       (fun idx data -> { data; parent = idx; depth = 0 })
       (Dynarray.of_list data)
 
   let add (graph : 'a classes) data =
-    Dynarray.add_last graph { data; parent = Dynarray.length graph; depth = 0 }
+    let id = Dynarray.length graph in
+    Dynarray.add_last graph { data; parent = id; depth = 0 };
+    id
 
   let assert_valid_id (graph : 'a classes) (node_idx : id) =
     if not (0 <= node_idx && node_idx <= Dynarray.length graph) then
@@ -63,11 +71,16 @@ end = struct
     let n = find graph n in
     let m = find graph m in
 
-    if graph.!(n).depth > graph.!(m).depth then graph.!(m).parent <- n
-    else if graph.!(n).depth < graph.!(m).depth then graph.!(n).parent <- m
+    if graph.!(n).depth > graph.!(m).depth then (
+      graph.!(m).parent <- n;
+      n)
+    else if graph.!(n).depth < graph.!(m).depth then (
+      graph.!(n).parent <- m;
+      m)
     else (
       graph.!(m).parent <- n;
-      graph.!(n).depth <- graph.!(n).depth + 1)
+      graph.!(n).depth <- graph.!(n).depth + 1;
+      n)
 
   (* we only allow to access data, not the internal implementation *)
   let ( .!() ) graph idx = graph.!(idx).data
@@ -83,16 +96,17 @@ end = struct
       graph1
 end
 
-open UnionFind
+open Base
 
+type id = UnionFind.id
 type 'a enode = { data : 'a; children : id list }
+type 'a classes = 'a enode UnionFind.classes
 
-type 'a egraph = {
-  unionfind : 'a enode classes;
-  hashcons : ('a enode, id) Hashtbl.t;
-}
+type 'a egraph = { unionfind : 'a classes; hashcons : ('a enode, id) Hashtbl.t }
 (** an [egraph] is represented by the UnionFind classes that can be queried
-    according to their [id], and reciprocally you can get the *)
+    according to their [id], and reciprocally you can get the [id] of a class
+    from a [enode], which is useful when you have to check whether a [term] is
+    represented in the [egraph]*)
 
 (* What should an e-graph do ?
  * 1. load the AST of an expression
@@ -105,27 +119,45 @@ type 'a egraph = {
  * - when adding e-nodes, try to share with existing ones (has to be the same data and children)
  *)
 
-(** retrieves the [id] of [expr] if it was already represented in the [egraph]
-    or raises [Not_found] *)
-let rec find (eg : Base.symbol egraph) (expr : Base.term) : id =
-  Hashtbl.find eg.hashcons
-    (match expr with
-    | V x -> { data = Var x; children = [] }
-    | T (f, t) -> { data = F f; children = List.map (find eg) t })
+let empty : 'a egraph =
+  { unionfind = UnionFind.create (); hashcons = Hashtbl.create 0 }
 
-let of_term (expr : Base.term) : Base.symbol egraph = failwith "TODO"
+(** retrieves the [id] of the [term] looked up, and creates it in case it is not
+    yet stored in the [egraph] *)
+let rec of_term ?(eg : symbol egraph = empty) (expr : term) : id =
+  let enode =
+    match expr with
+    | V x -> { data = Var x; children = [] }
+    | T (f, t) -> { data = F f; children = List.map (of_term ~eg) t }
+  in
+
+  (* if [expr] is already represented in [eg], no modification is done to [eg]
+   * otherwise, we create a new node *)
+  try Hashtbl.find eg.hashcons enode
+  with Not_found ->
+    let add (eg : 'a egraph) (node : 'a enode) : id =
+      let new_id = UnionFind.add eg.unionfind node in
+      Hashtbl.add eg.hashcons node new_id;
+      new_id
+    in
+
+    add eg enode
+
+let find (eg : symbol egraph) (expr : term) : id = of_term ~eg expr
+
+let union (eg : 'a egraph) (class1 : id) (class2 : id) : id =
+  UnionFind.union eg.unionfind class1 class2
 
 (** extracts a term that only contains representatives
 
     starts with the given eclass *)
-let to_term (eg : Base.symbol egraph) (base : id) : Base.term = failwith "TODO"
+let to_term (eg : symbol egraph) (base : id) : term = failwith "TODO"
 
 (** implements extraction based on cost function
 
     if the cost function is not provided, simply find the lightest equivalent
     term (each edge gets weigthed equally) *)
-let extract_best ?(weight = None) (eg : Base.symbol egraph) : Base.term =
-  failwith "TODO"
+let extract_best ?(weight = None) (eg : symbol egraph) : term = failwith "TODO"
 
 (** apply in place the rewrite to the egraph *)
-let ( @@= ) rewrite (eg : Base.symbol egraph) = failwith "TODO"
+let ( @@= ) rewrite (eg : symbol egraph) = failwith "TODO"
