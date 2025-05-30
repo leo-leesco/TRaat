@@ -1,38 +1,15 @@
 module UnionFind = struct
   open Egraph.UnionFind
 
-  (* let rec to_string = function *)
-  (*   | None -> "" *)
-  (*   | Some n -> *)
-  (*       String.concat "\n" *)
-  (*         ((string_of_int n.data ^ "; depth:" ^ string_of_int n.depth) *)
-  (*         :: List.map *)
-  (*              (fun line -> "\t" ^ line) *)
-  (*              (String.split_on_char '\n' (to_string n.parent))) *)
+  let to_string (graph : string classes) =
+    String.concat ",\n"
+      (map (fun parent data -> data ^ " -> " ^ string_of_idx parent) graph)
 
-  let rec to_string n =
-    (match n.parent with
-    | None -> "___\n"
-    | Some parent -> to_string parent ^ "\n^\n")
-    ^ n.data ^ "; depth:" ^ string_of_int n.depth
+  let graph = make [ "a"; "b"; "c"; "d" ]
 
   let () =
-    let a = node "a" in
-    let b = node "b" in
-    let c = node "c" in
-    let d = node "d" in
-
-    let b = union a b in
-    let c = union a c in
-    let d = union b d in
-    let a = union b c in
-
-    print_endline (to_string a);
-    print_endline (to_string b);
-    print_endline (to_string c);
-    print_endline (to_string d);
-
-    (* assert (eq (find ab) (find ac)); *)
-    (* assert (eq (find bd) (find ac)); *)
-    ()
+    print_endline (to_string graph);
+    let _ = union graph 0 1 in
+    let _ = union graph 0 2 in
+    print_endline (to_string graph)
 end

@@ -13,7 +13,7 @@ let rec solve (system : (term * term) list) (sub : subst) =
       solve (List.combine t s @ system) sub (* decompose *)
   | _ -> raise (Unify "This system cannot be solved")
 
-and elim (x : vname) (t : term) (system : (term * term) list) (sub : subst) =
+and elim (x : var) (t : term) (system : (term * term) list) (sub : subst) =
   if x &&? t then raise (Unify "Trying to solve a self-referential equation")
   else
     solve

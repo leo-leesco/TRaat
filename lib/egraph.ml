@@ -1,10 +1,17 @@
 (** represents equivalence classes as connected components of a graph *)
 module UnionFind : sig
-  type id
+  type id = int
   (** should be a valid index i.e. be lower than the number of elements in the
       set *)
 
+  val string_of_idx : id -> string
+
   type 'a classes
+
+  val length : 'a classes -> int
+
+  val map : (id -> 'a -> 'b) -> 'a classes -> 'b list
+  (** not a pure [map], the [id] taken is the parent *)
 
   val ( .!() ) : 'a classes -> id -> 'a
   (** access the data contained inside a node *)
@@ -27,6 +34,8 @@ module UnionFind : sig
 end = struct
   type id = int
 
+  let string_of_idx (idx : id) = string_of_int idx
+
   type 'a node = { data : 'a; mutable parent : id; mutable depth : id }
   (** [depth] should be the max number of children, 0 when a leaf
 
@@ -40,7 +49,11 @@ end = struct
   let ( .!() ) = Dynarray.get
   (* let ( .!()<- ) = Dynarray.set *)
 
+  let length graph = Dynarray.length graph
   let create = Dynarray.create
+
+  let map f graph =
+    Dynarray.to_list (Dynarray.map (fun node -> f node.parent node.data) graph)
 
   let make data =
     Dynarray.mapi
