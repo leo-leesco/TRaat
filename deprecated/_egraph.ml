@@ -160,6 +160,9 @@ let rec of_term ?(eg : symbol egraph = empty) (expr : term) : id =
 let find (eg : symbol egraph) (expr : term) : id = of_term ~eg expr
 let add_term (eg : symbol egraph) (expr : term) : id = of_term ~eg expr
 
+(* let ematch (eg : symbol egraph) (expr : term) : (id * subst) list = *)
+(*   of_term ~eg expr *)
+
 let union (eg : 'a egraph) (class1 : id) (class2 : id) : id =
   UnionFind.union eg.unionfind class1 class2
 
@@ -175,4 +178,4 @@ let to_term (eg : symbol egraph) (base : id) : term = failwith "TODO"
 let extract_best ?(weight = None) (eg : symbol egraph) : term = failwith "TODO"
 
 (** apply in place the rewrite to the egraph *)
-let ( @@= ) rewrite (eg : symbol egraph) = failwith "TODO"
+let ( @@= ) rewrite (eg : symbol egraph) (pattern : term) = failwith "TODO"

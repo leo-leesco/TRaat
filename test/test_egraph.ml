@@ -2,8 +2,9 @@ module UnionFind = struct
   open Egraph.UnionFind
 
   let to_string (graph : string classes) =
-    String.concat ",\n"
-      (map (fun parent data -> data ^ " -> " ^ string_of_idx parent) graph)
+    "_______\n"
+    ^ String.concat ",\n"
+        (map (fun parent data -> data ^ " -> " ^ graph.!(parent)) graph)
 
   let graph = make [ "a"; "b"; "c"; "d" ]
 
