@@ -8,7 +8,9 @@
   orders
   critical
   completion
+  unionFind
   egraph)
  (package traat)
  (wrapped false)
- (flags (:standard -warn-error -27)))
+ (flags
+  (:standard -warn-error -27)))
