@@ -8,7 +8,7 @@ let ( .!() ) = Dynarray.get
 let ( .!()<- ) = Dynarray.set
 let create (n : int) : t = Dynarray.init n (fun parent -> { parent; depth = 0 })
 
-let of_string (set : t) : string =
+let to_string (set : t) : string =
   "["
   ^ String.concat ", "
       (Dynarray.map (fun elem -> string_of_int elem.parent) set
@@ -24,6 +24,9 @@ let rec find (set : t) (elem : id) : id =
     set.!(elem).parent <- ancestor;
     ancestor
 
+let eq (set : t) (elem1 : id) (elem2 : id) : bool =
+  find set elem1 = find set elem2
+
 let union (set : t) (elem1 : id) (elem2 : id) : unit =
   let repr1 = find set elem1 in
   let repr2 = find set elem2 in
@@ -33,6 +36,14 @@ let union (set : t) (elem1 : id) (elem2 : id) : unit =
   else (
     set.!(repr1).parent <- repr2;
     set.!(repr2).depth <- set.!(repr2).depth + 1)
+
+let add (set : t) (idx : id) =
+  let len = Dynarray.length set in
+  if idx = len then Dynarray.add_last set { parent = idx; depth = 0 }
+  else
+    invalid_arg
+      (if idx < len then "this element was already added"
+       else "index out of bounds")
 
 (** [concat set1 set2] mutates [set1] in-place and adds [set2] at the end,
     preserving the parents of [set2] logically
