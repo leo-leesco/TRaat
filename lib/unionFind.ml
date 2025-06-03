@@ -1,21 +1,30 @@
 type id = int
-type elem = { mutable parent : id; mutable depth : int }
+type 'a elem = { data : 'a; mutable parent : id; mutable depth : int }
 
-type t = elem Dynarray.t
+type 'a t = 'a elem Dynarray.t
 (** represents the support of the equivalence classes, modified in-place *)
 
 let ( .!() ) = Dynarray.get
 let ( .!()<- ) = Dynarray.set
-let create (n : int) : t = Dynarray.init n (fun parent -> { parent; depth = 0 })
 
-let to_string (set : t) : string =
+let create (data : 'a Dynarray.t) : 'a t =
+  Dynarray.mapi (fun parent data -> { data; parent; depth = 0 }) data
+
+let to_string ?(string_of_a : ('a -> string) option = None) (set : 'a t) :
+    string =
   "["
   ^ String.concat ", "
-      (Dynarray.map (fun elem -> string_of_int elem.parent) set
+      (Dynarray.map
+         (fun elem ->
+           match string_of_a with
+           | Some to_string ->
+               to_string elem.data ^ " -> " ^ to_string set.!(elem.parent).data
+           | None -> string_of_int elem.parent)
+         set
       |> Dynarray.to_list)
   ^ "]"
 
-let rec find (set : t) (elem : id) : id =
+let rec find (set : 'a t) (elem : id) : id =
   let parent = set.!(elem).parent in
   if parent = elem then elem
   else
@@ -24,10 +33,10 @@ let rec find (set : t) (elem : id) : id =
     set.!(elem).parent <- ancestor;
     ancestor
 
-let eq (set : t) (elem1 : id) (elem2 : id) : bool =
+let eq (set : 'a t) (elem1 : id) (elem2 : id) : bool =
   find set elem1 = find set elem2
 
-let union (set : t) (elem1 : id) (elem2 : id) : unit =
+let union (set : 'a t) (elem1 : id) (elem2 : id) : unit =
   let repr1 = find set elem1 in
   let repr2 = find set elem2 in
   if set.!(repr1).depth > set.!(repr2).depth then set.!(repr2).parent <- repr1
@@ -37,19 +46,16 @@ let union (set : t) (elem1 : id) (elem2 : id) : unit =
     set.!(repr1).parent <- repr2;
     set.!(repr2).depth <- set.!(repr2).depth + 1)
 
-let add (set : t) (idx : id) =
-  let len = Dynarray.length set in
-  if idx = len then Dynarray.add_last set { parent = idx; depth = 0 }
-  else
-    invalid_arg
-      (if idx < len then "this element was already added"
-       else "index out of bounds")
+let add (set : 'a t) (data : 'a) =
+  if Dynarray.exists (fun elem -> elem.data = data) set then
+    invalid_arg "this element already exists in the set"
+  else Dynarray.add_last set { data; parent = Dynarray.length set; depth = 0 }
 
 (** [concat set1 set2] mutates [set1] in-place and adds [set2] at the end,
     preserving the parents of [set2] logically
 
     in particular, the classes are still disjoint after the [concat]enation *)
-let concat (set1 : t) (set2 : t) : unit =
+let concat (set1 : 'a t) (set2 : 'a t) : unit =
   Dynarray.append set1
     (Dynarray.map
        (fun elem -> { elem with parent = elem.parent + Dynarray.length set1 })
