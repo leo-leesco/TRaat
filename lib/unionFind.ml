@@ -46,15 +46,8 @@ let union (set : 'a t) (elem1 : id) (elem2 : id) : unit =
     set.!(repr1).parent <- repr2;
     set.!(repr2).depth <- set.!(repr2).depth + 1)
 
-(** returns the [id] of the newly inserted element, or raises [Invalid_argument]
-    on duplicate data entry *)
 let add (set : 'a t) (data : 'a) =
-  if Dynarray.exists (fun elem -> elem.data = data) set then
-    invalid_arg "this element already exists in the set"
-  else
-    let idx = Dynarray.length set in
-    Dynarray.add_last set { data; parent = idx; depth = 0 };
-    idx
+  Dynarray.add_last set { data; parent = Dynarray.length set; depth = 0 }
 
 (** [concat set1 set2] mutates [set1] in-place and adds [set2] at the end,
     preserving the parents of [set2] logically
