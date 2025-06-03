@@ -1,36 +1,30 @@
-type 'a enode = { data : 'a; mutable children : UnionFind.id list }
-
-type 'a graph = {
-  unionfind : 'a UnionFind.t;
-  hashcons : ('a, UnionFind.id) Hashtbl.t;
+type 'a quotientSet = {
+  classes : 'a UnionFind.t;
+  elements : ('a, UnionFind.id) Hashtbl.t;
 }
-(** [store] contains the data and is immutable, so classes are stored in
-    [unionfind] *)
+(** represents abstract datasets that has equivalence classes *)
 
 let of_list l =
-  let hashcons = Hashtbl.create (List.length l) in
+  let elements = Hashtbl.create (List.length l) in
   List.iteri
     (fun idx data ->
-      if Hashtbl.mem hashcons data then invalid_arg "duplicate entry"
-      else Hashtbl.add hashcons data idx)
+      if Hashtbl.mem elements data then invalid_arg "duplicate entry"
+      else Hashtbl.add elements data idx)
     l;
-  { unionfind = UnionFind.create (Dynarray.of_list l); hashcons }
+  { classes = UnionFind.create (Dynarray.of_list l); elements }
 
 (** attempts to insert the new data into the graph and returns its [id]
 
     idempotent : if it already exists, simply returns the existing [id] *)
-let add (graph : 'a graph) (data : 'a) =
-  try Hashtbl.find graph.hashcons data
+let add (set : 'a quotientSet) (data : 'a) =
+  try Hashtbl.find set.elements data
   with Not_found ->
-    let idx = UnionFind.add graph.unionfind data in
-    Hashtbl.add graph.hashcons data idx;
+    let idx = UnionFind.add set.classes data in
+    Hashtbl.add set.elements data idx;
     idx
 
-(** [concat graph1 graph2] mutates [graph1] in-place and adds [graph2] at the
-    end, preserving the parents of [graph2] logically
+type 'a enode = { data : 'a; mutable children : UnionFind.id list }
+type 'a egraph = 'a enode quotientSet
 
-    in particular, the classes are still disjoint after the [concat]enation *)
-let concat (graph1 : 'a graph) (graph2 : 'a graph) =
-  UnionFind.concat graph1.unionfind graph2.unionfind
-
-type 'a egraph = 'a enode graph
+let concat (eg1 : 'a egraph) (eg2 : 'a egraph) =
+  UnionFind.concat eg1.classes eg2.classes
