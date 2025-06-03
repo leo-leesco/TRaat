@@ -16,12 +16,15 @@ let of_list l =
     l;
   { unionfind = UnionFind.create (Dynarray.of_list l); hashcons }
 
+(** attempts to insert the new data into the graph and returns its [id]
+
+    idempotent : if it already exists, simply returns the existing [id] *)
 let add (graph : 'a graph) (data : 'a) =
-  try (
-    H
-  )
-  let idx = UnionFind.add graph.unionfind data in
-  Hashtbl.add graph.hashcons data idx
+  try Hashtbl.find graph.hashcons data
+  with Not_found ->
+    let idx = UnionFind.add graph.unionfind data in
+    Hashtbl.add graph.hashcons data idx;
+    idx
 
 (** [concat graph1 graph2] mutates [graph1] in-place and adds [graph2] at the
     end, preserving the parents of [graph2] logically
