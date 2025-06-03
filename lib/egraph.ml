@@ -1,3 +1,6 @@
+let ( .!() ) = UnionFind.( .!() )
+let ( .!()<- ) = UnionFind.( .!()<- )
+
 type 'a quotientSet = {
   classes : 'a UnionFind.t;
   elements : ('a, UnionFind.id) Hashtbl.t;
@@ -26,5 +29,14 @@ let add (set : 'a quotientSet) (data : 'a) =
 type 'a enode = { data : 'a; mutable children : UnionFind.id list }
 type 'a egraph = 'a enode quotientSet
 
-let concat (eg1 : 'a egraph) (eg2 : 'a egraph) =
-  UnionFind.concat eg1.classes eg2.classes
+let rec eq (eg : 'a egraph) (id1 : UnionFind.id) (id2 : UnionFind.id) =
+  let id1 = UnionFind.find eg.classes id1 in
+  let id2 = UnionFind.find eg.classes id2 in
+  id1 = id2
+  ||
+  let n1 = eg.classes.!(id1) in
+  let n2 = eg.classes.!(id2) in
+  n1.data.data = n2.data.data
+  && List.for_all2
+       (fun child1 child2 -> eq eg child1 child2)
+       n1.data.children n2.data.children
