@@ -47,7 +47,9 @@ let union (set : 'a t) (elem1 : id) (elem2 : id) : unit =
     set.!(repr2).depth <- set.!(repr2).depth + 1)
 
 let add (set : 'a t) (data : 'a) =
-  Dynarray.add_last set { data; parent = Dynarray.length set; depth = 0 }
+  let idx = Dynarray.length set in
+  Dynarray.add_last set { data; parent = idx; depth = 0 };
+  idx
 
 (** [concat set1 set2] mutates [set1] in-place and adds [set2] at the end,
     preserving the parents of [set2] logically
