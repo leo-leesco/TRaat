@@ -40,3 +40,15 @@ let rec eq (eg : 'a egraph) (id1 : UnionFind.id) (id2 : UnionFind.id) =
   && List.for_all2
        (fun child1 child2 -> eq eg child1 child2)
        n1.data.children n2.data.children
+
+type 'a ast = T of 'a * 'a ast list | V of 'a
+
+let rec of_AST (eg : 'a egraph) = function
+  | V x -> add eg { data = x; children = [] }
+  | T (f, t) ->
+      let children = List.map (fun child -> of_AST eg child) t in
+      add eg { data = f; children }
+
+let of_AST ?(eg : 'a egraph = of_list []) (term : 'a ast) =
+  let idx = of_AST eg term in
+  (eg, idx)

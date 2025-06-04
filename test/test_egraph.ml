@@ -1,16 +1,32 @@
-module UnionFind = struct
-  open Egraph.UnionFind
+open Egraph
 
-  let to_string (graph : string classes) =
-    "_______\n"
-    ^ String.concat ",\n"
-        (map (fun parent data -> data ^ " -> " ^ graph.!(parent)) graph)
+let ( .!() ) = UnionFind.( .!() )
 
-  let graph = make [ "a"; "b"; "c"; "d" ]
+type term = string ast
 
-  let () =
-    print_endline (to_string graph);
-    let _ = union graph 0 1 in
-    let _ = union graph 0 2 in
-    print_endline (to_string graph)
-end
+let rec string_of_ast = function
+  | V x -> x
+  | T (f, t) -> f ^ "(" ^ String.concat ", " (List.map string_of_ast t) ^ ")"
+
+let () = print_endline "**** EGRAPH ****"
+
+let () =
+  let term =
+    T ("g", [ T ("f", [ V "a"; V "b" ]); T ("f", [ V "a"; V "b" ]) ])
+  in
+  let eg, idx = of_AST term in
+  let ( =? ) = eq eg in
+  print_endline
+    (UnionFind.to_string
+       ~string_of_a:
+         (Some
+            (fun { data; children } ->
+              match children with
+              | [] -> data
+              | children ->
+                  data ^ "("
+                  ^ String.concat ", " (List.map string_of_int children)
+                  ^ ")"))
+       eg.classes);
+  let [ n1; n2 ] = eg.classes.!(idx).data.children in
+  assert (n1 =? n2)
