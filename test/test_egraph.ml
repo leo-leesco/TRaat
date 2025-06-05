@@ -2,7 +2,7 @@ open Egraph
 
 let ( .!() ) = UnionFind.( .!() )
 
-type term = string ast
+type var = string term
 
 let rec string_of_ast = function
   | V x -> x
@@ -28,5 +28,7 @@ let () =
                   ^ String.concat ", " (List.map string_of_int children)
                   ^ ")"))
        eg.classes);
-  let [ n1; n2 ] = eg.classes.!(idx).data.children in
+  let[@warning "-8" (* suppress non exhaustive pattern warning *)] [ n1; n2 ] =
+    eg.classes.!(idx).data.children
+  in
   assert (n1 =? n2)

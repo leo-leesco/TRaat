@@ -3,6 +3,8 @@ open UnionFind
 let () = print_endline "**** UNIONFIND ****"
 
 let () =
+  print_endline "\n*** test1 ***";
+
   let len1 = 5 in
   let set1 = create (Dynarray.of_seq (Seq.init len1 Fun.id)) in
   print_endline "set1 before concat";
@@ -35,6 +37,8 @@ let () =
   assert (extract_parent set1 = extract_parent concatenated)
 
 let () =
+  print_endline "\n*** test2 ***";
+
   let len1 = 5 in
   let set1 = create (Dynarray.of_seq (Seq.init len1 Fun.id)) in
   union set1 1 2;
@@ -58,4 +62,15 @@ let () =
   (* take into account the offset induced by joining the two disjoint sets *)
   assert (len1 + 0 =? len1 + 4);
   assert (len1 + 1 =? len1 + 2);
-  assert (len1 + 1 =? len1 + 3)
+  assert (len1 + 1 =? len1 + 3);
+
+  print_endline "class of 0";
+  print_endline (String.concat ", " (List.map string_of_int (get_class set1 0)));
+
+  print_endline ("class of " ^ string_of_int (len1 + 0));
+  print_endline
+    (String.concat ", " (List.map string_of_int (get_class set1 (len1 + 0))));
+
+  print_endline ("class of " ^ string_of_int (len1 + 1));
+  print_endline
+    (String.concat ", " (List.map string_of_int (get_class set1 (len1 + 1))))
