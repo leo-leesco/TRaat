@@ -52,3 +52,37 @@ let rec of_term (eg : 'a egraph) = function
 let of_term ?(eg : 'a egraph = of_list []) (term : 'a term) =
   let idx = of_term eg term in
   (eg, idx)
+
+type substitution = (UnionFind.id, UnionFind.id) Hashtbl.t
+(** specifies a node (intended to be a leaf i.e. a variable) to be replaced by a
+    tree
+
+    both are designated by their [id] *)
+
+exception Incompatible
+
+(** looks for matches with [pattern] starting at [node] *)
+let rec ematch (eg : 'a egraph) ~(node : UnionFind.id) (subst : substitution) :
+    'a term -> unit =
+  let ( =? ) = eq eg in
+  function
+  | V x -> (
+      try
+        let idx = Hashtbl.find eg.elements { data = x; children = [] } in
+        try
+          let replace = Hashtbl.find subst idx in
+          if replace =? node then () else raise Incompatible
+        with Not_found -> Hashtbl.add subst node idx
+      with Not_found ->
+        let _, idx = of_term ~eg (V x) in
+        Hashtbl.add subst node idx)
+  | T (f, t) ->
+      if eg.classes.!(node).data.data <> f then raise Incompatible
+      else
+        let get_class = UnionFind.get_class eg.classes in
+        List.iter2
+          (fun subterm node ->
+            List.iter
+              (fun node -> ematch eg ~node subst subterm)
+              (get_class node))
+          t eg.classes.!(node).data.children
