@@ -29,7 +29,6 @@ let rec find (set : 'a t) (elem : id) : id =
   if parent = elem then elem
   else
     let ancestor = find set parent in
-    set.!(parent).parent <- ancestor;
     set.!(elem).parent <- ancestor;
     ancestor
 

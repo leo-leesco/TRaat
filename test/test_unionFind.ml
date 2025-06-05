@@ -3,29 +3,46 @@ open UnionFind
 let () = print_endline "**** UNIONFIND ****"
 
 let () =
-  let set1 = create (Dynarray.of_seq (Seq.init 5 Fun.id)) in
+  let len1 = 5 in
+  let set1 = create (Dynarray.of_seq (Seq.init len1 Fun.id)) in
+  print_endline "set1 before concat";
   print_endline (to_string set1);
 
-  let set2 =
-    create (Dynarray.of_seq (Seq.init 6 (fun n -> n + Dynarray.length set1)))
-  in
+  let len2 = 6 in
+  let set2 = create (Dynarray.of_seq (Seq.init len2 Fun.id)) in
+  print_endline "set2";
   print_endline (to_string set2);
 
   concat set1 set2;
   print_endline (to_string set1);
-  assert (
-    set1
-    = create
-        (Dynarray.of_seq
-           (Seq.init (Dynarray.length set1 + Dynarray.length set2) Fun.id)))
+
+  let extract_parent = Dynarray.map (fun { parent; _ } -> parent) in
+  let print parents =
+    print_endline
+      ("["
+      ^ String.concat ", "
+          (Dynarray.to_list (Dynarray.map string_of_int parents))
+      ^ "]")
+  in
+
+  print_endline "set1 after concat";
+  print (extract_parent set1);
+
+  let concatenated = create (Dynarray.of_seq (Seq.init (len1 + len2) Fun.id)) in
+  print_endline "concatenated";
+  print (extract_parent concatenated);
+
+  assert (extract_parent set1 = extract_parent concatenated)
 
 let () =
-  let set1 = create (Dynarray.of_seq (Seq.init 5 Fun.id)) in
+  let len1 = 5 in
+  let set1 = create (Dynarray.of_seq (Seq.init len1 Fun.id)) in
   union set1 1 2;
   union set1 1 3;
   union set1 1 0;
 
-  let set2 = create (Dynarray.of_seq (Seq.init 5 Fun.id)) in
+  let len2 = 6 in
+  let set2 = create (Dynarray.of_seq (Seq.init len2 Fun.id)) in
   union set2 0 4;
   union set2 1 2;
   union set2 2 3;
@@ -39,6 +56,6 @@ let () =
   assert (0 =? 3);
 
   (* take into account the offset induced by joining the two disjoint sets *)
-  assert (5 =? 9);
-  assert (6 =? 7);
-  assert (6 =? 8)
+  assert (len1 + 0 =? len1 + 4);
+  assert (len1 + 1 =? len1 + 2);
+  assert (len1 + 1 =? len1 + 3)
