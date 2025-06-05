@@ -14,7 +14,7 @@ let () =
   let term =
     T ("g", [ T ("f", [ V "a"; V "b" ]); T ("f", [ V "a"; V "b" ]) ])
   in
-  let eg, idx = of_AST term in
+  let eg, idx = of_term term in
   let ( =? ) = eq eg in
   print_endline
     (UnionFind.to_string
