@@ -59,3 +59,8 @@ let concat (set1 : 'a t) (set2 : 'a t) : unit =
     (Dynarray.map
        (fun elem -> { elem with parent = elem.parent + Dynarray.length set1 })
        set2)
+
+(** returns the [id list] of elements in the class of the queried [id] *)
+let get_class (set : 'a t) (repr : id) =
+  let in_class = eq set repr in
+  List.filter in_class (List.of_seq (Seq.init (Dynarray.length set) Fun.id))
