@@ -36,10 +36,10 @@ let rec eq (eg : 'a egraph) (id1 : UnionFind.id) (id2 : UnionFind.id) =
   ||
   let n1 = eg.classes.!(id1) in
   let n2 = eg.classes.!(id2) in
-  n1.data.data = n2.data.data
+  n1.data = n2.data
   && List.for_all2
        (fun child1 child2 -> eq eg child1 child2)
-       n1.data.children n2.data.children
+       n1.children n2.children
 
 type 'a term = T of 'a * 'a term list | V of 'a
 

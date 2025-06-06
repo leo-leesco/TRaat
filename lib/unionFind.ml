@@ -64,3 +64,9 @@ let concat (set1 : 'a t) (set2 : 'a t) : unit =
 let get_class (set : 'a t) (repr : id) =
   let in_class = eq set repr in
   List.filter in_class (List.of_seq (Seq.init (Dynarray.length set) Fun.id))
+
+(** access [data] only *)
+let ( .!() ) set idx = set.!(idx).data
+
+(** modify [data] only *)
+let ( .!()<- ) set idx data = set.!(idx) <- data
