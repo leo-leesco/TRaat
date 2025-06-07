@@ -53,36 +53,41 @@ let of_term ?(eg : 'a egraph = of_list []) (term : 'a term) =
   let idx = of_term eg term in
   (eg, idx)
 
-type substitution = (UnionFind.id, UnionFind.id) Hashtbl.t
-(** specifies a node (intended to be a leaf i.e. a variable) to be replaced by a
-    tree
-
-    both are designated by their [id] *)
+type 'a substitution = ('a, UnionFind.id) Hashtbl.t
+(** ['a] represents the base data stored in the [egraph] (usually a variable
+    identifier such as [x] or [f]) *)
 
 exception Incompatible
 
+module IdSet = Set.Make (Int)
+
 (** looks for matches with [pattern] starting at [node] *)
-let rec ematch (eg : 'a egraph) ~(node : UnionFind.id) (subst : substitution) :
-    'a term -> unit =
+let rec node_match (eg : 'a egraph) (subst : 'a substitution)
+    (pattern : 'a term) (node : UnionFind.id) : 'a substitution list =
   let ( =? ) = eq eg in
-  function
+  match pattern with
   | V x -> (
-      try
-        let idx = Hashtbl.find eg.elements { data = x; children = [] } in
-        try
-          let replace = Hashtbl.find subst idx in
-          if replace =? node then () else raise Incompatible
-        with Not_found -> Hashtbl.add subst node idx
+      try if node =? Hashtbl.find subst x then [ subst ] else []
       with Not_found ->
-        let _, idx = of_term ~eg (V x) in
-        Hashtbl.add subst node idx)
+        Hashtbl.add subst x node;
+        [ subst ])
   | T (f, t) ->
-      if eg.classes.!(node).data.data <> f then raise Incompatible
+      if f <> eg.classes.!(node).data then
+        let subclasses =
+          List.concat
+            (List.map
+               (UnionFind.get_class eg.classes)
+               eg.classes.!(node).children)
+          |> IdSet.of_list |> IdSet.to_list (* deduplicating *)
+        in
+        List.concat (List.map (node_match eg subst pattern) subclasses)
       else
-        let get_class = UnionFind.get_class eg.classes in
-        List.iter2
-          (fun subterm node ->
-            List.iter
-              (fun node -> ematch eg ~node subst subterm)
-              (get_class node))
-          t eg.classes.!(node).data.children
+        List.concat
+          (List.map2 (node_match eg subst) t eg.classes.!(node).children)
+
+let ematch (eg : 'a egraph) (pattern : 'a term) (node : UnionFind.id) :
+    'a substitution list =
+  List.concat
+    (List.map
+       (node_match eg (Hashtbl.create 0) pattern)
+       (UnionFind.get_class eg.classes node))
