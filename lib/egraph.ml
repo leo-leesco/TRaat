@@ -71,7 +71,7 @@ let rec node_match (eg : 'a egraph) (subst : 'a substitution)
       with Not_found ->
         Hashtbl.add subst x node;
         [ subst ])
-  | T (f, t) ->
+  | T (f, t) -> (
       if f <> eg.classes.!(node).data then
         let subclasses =
           List.concat
@@ -82,12 +82,24 @@ let rec node_match (eg : 'a egraph) (subst : 'a substitution)
         in
         List.concat (List.map (node_match eg subst pattern) subclasses)
       else
-        List.concat
-          (List.map2 (node_match eg subst) t eg.classes.!(node).children)
+        match (t, eg.classes.!(node).children) with
+        | pattern :: patterns, child :: children ->
+            let subs = ematch eg ~subst pattern child in
+            List.concat
+              (List.map2
+                 (fun p c ->
+                   List.concat
+                     (List.map (fun sub -> ematch eg ~subst:sub p c) subs))
+                 patterns children)
+        | [], [] -> [ subst ]
+        | _ ->
+            invalid_arg
+              "tried to pattern match with an incompatible arity for the same \
+               symbol")
 
-let ematch (eg : 'a egraph) (pattern : 'a term) (node : UnionFind.id) :
-    'a substitution list =
+and ematch (eg : 'a egraph) ?(subst : 'a substitution = Hashtbl.create 0)
+    (pattern : 'a term) (node : UnionFind.id) : 'a substitution list =
   List.concat
     (List.map
-       (node_match eg (Hashtbl.create 0) pattern)
+       (node_match eg subst pattern)
        (UnionFind.get_class eg.classes node))
