@@ -41,6 +41,19 @@ let rec eq (eg : 'a egraph) (id1 : UnionFind.id) (id2 : UnionFind.id) =
        (fun child1 child2 -> eq eg child1 child2)
        n1.children n2.children
 
+let to_string eg =
+  UnionFind.to_string
+    ~string_of_a:
+      (Some
+         (fun { data; children } ->
+           match children with
+           | [] -> data
+           | children ->
+               data ^ "("
+               ^ String.concat ", " (List.map string_of_int children)
+               ^ ")"))
+    eg.classes
+
 type 'a term = T of 'a * 'a term list | V of 'a
 
 let rec of_term (eg : 'a egraph) = function
@@ -56,8 +69,6 @@ let of_term ?(eg : 'a egraph = of_list []) (term : 'a term) =
 type 'a substitution = ('a, UnionFind.id) Hashtbl.t
 (** ['a] represents the base data stored in the [egraph] (usually a variable
     identifier such as [x] or [f]) *)
-
-exception Incompatible
 
 module IdSet = Set.Make (Int)
 
