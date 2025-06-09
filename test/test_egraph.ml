@@ -66,6 +66,7 @@ let () =
     ^ String.concat "\n"
         (List.map (string_of_substitution eg ~string_of_a:Fun.id) matches));
 
+  print_newline ();
   print_endline
     "** h(g(a,b)) (inside f(g(a,b),h(g(a,b)))) || match against h(x) **";
   let h_index = 3 in
