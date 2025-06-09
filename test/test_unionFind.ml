@@ -1,9 +1,12 @@
 open UnionFind
 
-let () = print_endline "**** UNIONFIND ****"
+let () =
+  print_newline ();
+  print_endline "**** UNIONFIND ****"
 
 let () =
-  print_endline "\n*** test1 ***";
+  print_newline ();
+  print_endline "*** test1 ***";
 
   let len1 = 5 in
   let set1 = create (Dynarray.of_seq (Seq.init len1 Fun.id)) in
@@ -37,7 +40,8 @@ let () =
   assert (extract_parent set1 = extract_parent concatenated)
 
 let () =
-  print_endline "\n*** test2 ***";
+  print_newline ();
+  print_endline "*** test2 ***";
 
   let len1 = 5 in
   let set1 = create (Dynarray.of_seq (Seq.init len1 Fun.id)) in

@@ -1,7 +1,9 @@
 open Base
 open OUnit2
 
-let () = print_endline "**** BASE ****"
+let () =
+  print_newline ();
+  print_endline "**** BASE ****"
 
 let () =
   print_endline (string_of_term (V ("t", 1)));

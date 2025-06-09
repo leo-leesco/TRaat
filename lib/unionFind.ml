@@ -10,12 +10,14 @@ let ( .!()<- ) = Dynarray.set
 let create (data : 'a Dynarray.t) : 'a t =
   Dynarray.mapi (fun parent data -> { data; parent; depth = 0 }) data
 
-let to_string ?(string_of_a : ('a -> string) option = None) (set : 'a t) :
-    string =
+let to_string ?(string_of_a : ('a -> string) option = None) ?(index = true)
+    (set : 'a t) : string =
   "["
   ^ String.concat ", "
-      (Dynarray.map
-         (fun elem ->
+      (Dynarray.mapi
+         (fun idx elem ->
+           (if index then string_of_int idx ^ ":" else "")
+           ^
            match string_of_a with
            | Some to_string ->
                to_string elem.data ^ " -> " ^ to_string set.!(elem.parent).data

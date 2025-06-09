@@ -90,7 +90,7 @@ let string_of_substitution ~(string_of_a : 'a -> string) (eg : 'a egraph)
       |> Seq.map (fun (a, idx) ->
              string_of_a a ^ " -> "
              ^ string_of_a eg.classes.!(idx).data
-             ^ "(" ^ string_of_int idx ^ ")")
+             ^ Base.index_to_subscript idx)
       |> List.of_seq)
   ^ "}"
 
@@ -115,7 +115,7 @@ let rec node_match (eg : 'a egraph) (subst : 'a substitution)
                eg.classes.!(node).children)
           |> IdSet.of_list |> IdSet.to_list (* deduplicating *)
         in
-        List.concat (List.map (node_match eg subst pattern) subclasses)
+        List.concat (List.map (ematch eg ~subst pattern) subclasses)
       else
         match (t, eg.classes.!(node).children) with
         | pattern :: patterns, child :: children ->
