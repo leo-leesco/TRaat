@@ -54,6 +54,18 @@ let to_string eg =
                ^ ")"))
     eg.classes
 
+let rec string_of_enode ~(string_of_a : 'a -> string) (eg : 'a egraph)
+    (idx : UnionFind.id) =
+  let node = eg.classes.!(idx) in
+  string_of_a node.data
+  ^
+  if not (List.is_empty node.children) then
+    "("
+    ^ String.concat ", "
+        (List.map (string_of_enode ~string_of_a eg) node.children)
+    ^ ")"
+  else ""
+
 type 'a term = T of 'a * 'a term list | V of 'a
 
 let rec of_term (eg : 'a egraph) = function
@@ -69,6 +81,18 @@ let of_term ?(eg : 'a egraph = of_list []) (term : 'a term) =
 type 'a substitution = ('a, UnionFind.id) Hashtbl.t
 (** ['a] represents the base data stored in the [egraph] (usually a variable
     identifier such as [x] or [f]) *)
+
+let string_of_substitution ~(string_of_a : 'a -> string) (eg : 'a egraph)
+    (sub : 'a substitution) =
+  "{"
+  ^ String.concat ", "
+      (sub |> Hashtbl.to_seq
+      |> Seq.map (fun (a, idx) ->
+             string_of_a a ^ " -> "
+             ^ string_of_a eg.classes.!(idx).data
+             ^ "(" ^ string_of_int idx ^ ")")
+      |> List.of_seq)
+  ^ "}"
 
 module IdSet = Set.Make (Int)
 
