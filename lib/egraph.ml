@@ -19,7 +19,7 @@ let of_list l =
 (** attempts to insert the new data into the graph and returns its [id]
 
     idempotent : if it already exists, simply returns the existing [id] *)
-let add (set : 'a quotientSet) (data : 'a) =
+let add_elem (set : 'a quotientSet) (data : 'a) =
   try Hashtbl.find set.elements data
   with Not_found ->
     let idx = UnionFind.add set.classes data in
@@ -68,15 +68,18 @@ let rec string_of_enode ~(string_of_a : 'a -> string) (eg : 'a egraph)
 
 type 'a term = T of 'a * 'a term list | V of 'a
 
-let rec of_term (eg : 'a egraph) = function
-  | V x -> add eg { data = x; children = [] }
+let rec add (eg : 'a egraph) = function
+  | V x -> add_elem eg { data = x; children = [] }
   | T (f, t) ->
-      let children = List.map (fun child -> of_term eg child) t in
-      add eg { data = f; children }
+      let children = List.map (add eg) t in
+      add_elem eg { data = f; children }
 
-let of_term ?(eg : 'a egraph = of_list []) (term : 'a term) =
-  let idx = of_term eg term in
+let of_term (term : 'a term) =
+  let eg = of_list [] in
+  let idx = add eg term in
   (eg, idx)
+
+let union (eg : 'a egraph) = UnionFind.union eg.classes
 
 type 'a substitution = ('a, UnionFind.id) Hashtbl.t
 (** ['a] represents the base data stored in the [egraph] (usually a variable

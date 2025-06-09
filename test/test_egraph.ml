@@ -102,5 +102,23 @@ let () =
   let gch = T ("g", [ V "c"; T ("h", [ V "d" ]) ]) in
   let e = V "e" in
   let eg, f = of_term fab in
+
+  let add = add eg in
+  let union = union eg in
+
+  print_endline "adding terms to egraph";
+  let g = add gch in
+  let e = add e in
+
+  (* [0:a -> a, 1:b -> b, 2:f(0, 1) -> f(0, 1), 3:c -> c, 4:d -> d, 5:h(4) -> h(4), 6:g(3, 5) -> g(3, 5), 7:e -> e] *)
+  union 1 6;
+  union 5 7;
   print_endline (to_string eg);
-  ()
+
+  let pattern = T ("g", [ V "x"; T ("h", [ V "y" ]) ]) in
+  let matches = ematch eg pattern f in
+  print_endline (string_of_enode ~string_of_a:Fun.id eg f);
+  print_endline
+    ("matches :\n"
+    ^ String.concat "\n"
+        (List.map (string_of_substitution eg ~string_of_a:Fun.id) matches))
