@@ -106,35 +106,35 @@ let rec node_match (eg : 'a egraph) (subst : 'a substitution)
       with Not_found ->
         Hashtbl.add subst x node;
         [ subst ])
-  | T (f, t) -> (
-      if f <> eg.classes.!(node).data then
-        let subclasses =
+  | T (f, t) ->
+      if f = eg.classes.!(node).data then
+        let subs =
+          List.fold_left2
+            (fun substitutions subpattern child ->
+              List.concat
+                (List.map
+                   (fun subst -> enode_match eg subst subpattern child)
+                   substitutions))
+            [ subst ] t eg.classes.!(node).children
+        in
+        if subs <> [] then subs
+        else
           List.concat
             (List.map
-               (UnionFind.get_class eg.classes)
+               (enode_match eg subst pattern)
                eg.classes.!(node).children)
-          |> IdSet.of_list |> IdSet.to_list (* deduplicating *)
-        in
-        List.concat (List.map (ematch eg ~subst pattern) subclasses)
-      else
-        match (t, eg.classes.!(node).children) with
-        | pattern :: patterns, child :: children ->
-            let subs = ematch eg ~subst pattern child in
-            List.concat
-              (List.map2
-                 (fun p c ->
-                   List.concat
-                     (List.map (fun sub -> ematch eg ~subst:sub p c) subs))
-                 patterns children)
-        | [], [] -> [ subst ]
-        | _ ->
-            invalid_arg
-              "tried to pattern match with an incompatible arity for the same \
-               symbol")
+      else []
 
-and ematch (eg : 'a egraph) ?(subst : 'a substitution = Hashtbl.create 0)
-    (pattern : 'a term) (node : UnionFind.id) : 'a substitution list =
+and enode_match (eg : 'a egraph) (subst : 'a substitution) (pattern : 'a term)
+    (node : UnionFind.id) : 'a substitution list =
   List.concat
     (List.map
        (node_match eg subst pattern)
        (UnionFind.get_class eg.classes node))
+
+let rec ematch (eg : 'a egraph) (pattern : 'a term) (node : UnionFind.id) :
+    'a substitution list =
+  let subs = enode_match eg (Hashtbl.create 0) pattern node in
+  if List.is_empty subs then
+    List.concat (List.map (ematch eg pattern) eg.classes.!(node).children)
+  else subs
