@@ -1,14 +1,7 @@
 (library
  (name traat)
  (public_name traat)
- (modules
-  base
-  unification
-  matching
-  rewriting
-  orders
-  critical
-  completion)
+ (modules base unification matching rewriting orders critical completion)
  (wrapped false)
  (flags
   (:standard -warn-error -27)))
