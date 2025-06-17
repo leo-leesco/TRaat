@@ -1,5 +1,6 @@
 (library
  (name traat)
+ (public_name traat)
  (modules
   base
   unification
@@ -8,7 +9,6 @@
   orders
   critical
   completion)
- (package traat)
  (wrapped false)
  (flags
   (:standard -warn-error -27)))
