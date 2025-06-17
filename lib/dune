@@ -7,9 +7,7 @@
   rewriting
   orders
   critical
-  completion
-  unionFind
-  egraph)
+  completion)
  (package traat)
  (wrapped false)
  (flags

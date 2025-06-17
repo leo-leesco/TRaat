@@ -1,5 +1,5 @@
 (tests
- (names test_base test_unionFind test_egraph)
+ (names test_base)
  (libraries traat ounit2)
  (flags
   (:standard -warn-error -a)))
